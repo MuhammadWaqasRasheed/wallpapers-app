@@ -2,28 +2,20 @@ const Wallpaper = require("../models/Wallpaper");
 const commonUtil = require("../Util/commonUtilities");
 
 exports.CREATE_NEW_WALLPAPER = async (req, res) => {
-  let name = req.body.name;
-  let image = req.file ? req.file.buffer : null;
-  let category = req.body.category;
-  let user = req.body.user;
-
-  // validating User input
-  if (
-    commonUtil.isNullOrEmptystring(name) ||
-    commonUtil.isNullOrEmptystring(category) ||
-    commonUtil.isNullOrEmptystring(user) ||
-    !image
-  ) {
-    return res.status(400).send({ error: "Invalid Form data" });
-  }
-
   try {
+    if (
+      commonUtil.isNullOrEmptystring(req.body.name) ||
+      commonUtil.isNullOrEmptystring(req.body.imageURL)
+    ) {
+      throw new Error("Invalid Form data");
+    }
+
     // creating new Wallpaper
     let newWallpaper = new Wallpaper({
-      name,
-      category,
-      image,
-      user,
+      name: req.body.name,
+      imageURL: req.body.imageURL,
+      category: req.body.category,
+      user: req.user._id,
     });
     newWallpaper = await newWallpaper.save();
     return res.send(newWallpaper);
@@ -35,8 +27,17 @@ exports.CREATE_NEW_WALLPAPER = async (req, res) => {
 };
 
 exports.GET_WALLPAPER_LIST = async (req, res) => {
+  let limit = !commonUtil.isNullOrEmptystring(req.query.limit)
+    ? parseInt(req.query.limit)
+    : 6;
+  let skip = !commonUtil.isNullOrEmptystring(req.query.skip)
+    ? parseInt(req.query.skip)
+    : 0;
   try {
-    const wallpaperList = await Wallpaper.find({});
+    const wallpaperList = await Wallpaper.find({})
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit);
 
     res.send({
       count: wallpaperList.length,
@@ -49,9 +50,6 @@ exports.GET_WALLPAPER_LIST = async (req, res) => {
 
 exports.GET_WALLPAPER_BY_ID = async (req, res) => {
   const id = req.params.id;
-  if (commonUtil.isNullOrEmptystring(id)) {
-    return res.status(400).send("Invalid Object Id");
-  }
   try {
     const wallpaper = await Wallpaper.findById(id);
     if (!wallpaper) {
@@ -83,7 +81,7 @@ exports.ERROR_HANDLER = async (error, req, res) => {
 
 exports.UPDATE_WALLPAPER_BY_ID = async (req, res) => {
   const id = req.params.id;
-  const allowedUpdates = ["name", "image", "category", "user"];
+  const allowedUpdates = ["name", "imageURL", "category"];
   try {
     // deleting garbage data if sent with request
     Object.keys(req.body).forEach((key) => {
@@ -95,9 +93,6 @@ exports.UPDATE_WALLPAPER_BY_ID = async (req, res) => {
           .send({ error: `${key} cannot null or empty string.` });
       }
     });
-
-    // now check image update
-    req.file ? (req.body["image"] = req.file.buffer) : null;
 
     const updatedWallpaper = await Wallpaper.findByIdAndUpdate(
       id,
@@ -113,9 +108,10 @@ exports.UPDATE_WALLPAPER_BY_ID = async (req, res) => {
     }
     res.send(updatedWallpaper);
   } catch (err) {
-    if (err.name === "CastError") {
-      return res.status(400).send({ error: "Invalid Object ID." });
-    }
     res.status(500).send(err);
   }
+};
+
+exports.TEST_ROUTE = (req, res) => {
+  res.send("test route");
 };

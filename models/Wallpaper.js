@@ -6,15 +6,16 @@ const wallpaperSchema = mongoose.Schema(
   {
     name: {
       type: String,
+      unique: true,
     },
-    image: {
-      type: Buffer,
+    imageURL: {
+      type: String,
       required: true,
     },
-    // category: {
-    //   type: mongoose.Schema.Types.ObjectId,
-    //   required: true,
-    // },
+    category: {
+      type: mongoose.Schema.Types.ObjectId,
+      required: true,
+    },
     user: {
       type: mongoose.Schema.Types.ObjectId,
       required: true,
@@ -26,13 +27,13 @@ const wallpaperSchema = mongoose.Schema(
   }
 );
 
-wallpaperSchema.pre("save", async function (next) {
-  const wallpaper = this;
-  // if (user.isModified("image")) {
-  //   wallpaper.image = await sharp(wallpaper.image).png().toBuffer();
-  // }
-  wallpaper.image = await sharp(wallpaper.image).png().toBuffer();
-  next();
-});
+// wallpaperSchema.pre("save", async function (next) {
+//   const wallpaper = this;
+//   // if (user.isModified("image")) {
+//   //   wallpaper.image = await sharp(wallpaper.image).png().toBuffer();
+//   // }
+//   wallpaper.image = await sharp(wallpaper.image).png().toBuffer();
+//   next();
+// });
 
 module.exports = mongoose.model(WALLPAPERS_MODEL, wallpaperSchema);

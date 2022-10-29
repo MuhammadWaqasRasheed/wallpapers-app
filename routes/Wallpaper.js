@@ -8,13 +8,7 @@ const multer = require("multer");
 const upload = multer({});
 
 //create a wallpaper
-router.post(
-  "/",
-  Auth,
-  upload.single("image"),
-  wallpaperController.CREATE_NEW_WALLPAPER,
-  wallpaperController.ERROR_HANDLER
-);
+router.post("/", Auth, wallpaperController.CREATE_NEW_WALLPAPER);
 
 router.get("/:id", wallpaperController.GET_WALLPAPER_BY_ID);
 router.get("/", wallpaperController.GET_WALLPAPER_LIST);
@@ -27,6 +21,15 @@ router.put(
   upload.single("image"),
   wallpaperController.UPDATE_WALLPAPER_BY_ID,
   wallpaperController.ERROR_HANDLER
+);
+
+storageUpload = multer({});
+
+router.post(
+  "/test",
+  // Auth,
+  // upload.single("image"),
+  wallpaperController.TEST_ROUTE
 );
 
 // get wallpaper by id

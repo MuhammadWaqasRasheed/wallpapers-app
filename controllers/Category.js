@@ -24,8 +24,17 @@ exports.createCategory = async (req, res) => {
 };
 
 exports.GET_All_Categories = async (req, res) => {
+  // let limit = !commonUtil.isNullOrEmptystring(req.query.limit)
+  //   ? parseInt(req.query.limit)
+  //   : 6;
+  // let skip = !commonUtil.isNullOrEmptystring(req.query.skip)
+  //   ? parseInt(req.query.skip)
+  //   : 0;
+
   try {
-    const CategoryList = await Category.find({});
+    const CategoryList = await Category.find({}).sort({ createdAt: -1 });
+    // .skip(skip)
+    // .limit(limit);
 
     res.send({
       count: CategoryList.length,
@@ -67,9 +76,10 @@ exports.DELETE_CATEGORY_BY_ID = async (req, res) => {
   }
 };
 
-exports.UPDATE_WALLPAPER_BY_ID = async (req, res) => {
+exports.UPDATE_CATEGORY_BY_ID = async (req, res) => {
+  console.log("category route working.")
   const id = req.params.id;
-  const allowedUpdates = ["name", "image", "category", "user"];
+  const allowedUpdates = ["name"];
   try {
     // deleting garbage data if sent with request
     Object.keys(req.body).forEach((key) => {
@@ -82,10 +92,7 @@ exports.UPDATE_WALLPAPER_BY_ID = async (req, res) => {
       }
     });
 
-    // now check image update
-    req.file ? (req.body["image"] = req.file.buffer) : null;
-
-    const updatedWallpaper = await Wallpaper.findByIdAndUpdate(
+    const updatedCategory = await Category.findByIdAndUpdate(
       id,
       {
         ...req.body,
@@ -94,10 +101,10 @@ exports.UPDATE_WALLPAPER_BY_ID = async (req, res) => {
         new: true,
       }
     );
-    if (!updatedWallpaper) {
+    if (!updatedCategory) {
       return res.status(400).send("Invalid Object Id.");
     }
-    res.send(updatedWallpaper);
+    res.send(updatedCategory);
   } catch (err) {
     if (err.name === "CastError") {
       return res.status(400).send({ error: "Invalid Object ID." });

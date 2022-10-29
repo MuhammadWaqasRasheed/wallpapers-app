@@ -3,13 +3,15 @@ const router = express.Router();
 const categoryController = require("../controllers/Category");
 const { Auth } = require("../middlewares/auth");
 
-//create a wallpaper
+//create a Category
 router.post("/", Auth, categoryController.createCategory);
 
 router.get("/:id", categoryController.GET_Category_BY_ID);
 router.get("/", categoryController.GET_All_Categories);
 
 router.delete("/", Auth, categoryController.DELETE_CATEGORY_BY_ID);
+
+router.patch("/:id", Auth, categoryController.UPDATE_CATEGORY_BY_ID);
 
 // router.put(
 //   "/:id",
